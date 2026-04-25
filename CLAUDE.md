@@ -119,3 +119,40 @@ npx shadcn@latest add card
 | `VITE_SUPABASE_ANON_KEY` | Supabase 匿名キー | フロント |
 | `VITE_OPENWEATHER_API_KEY` | OpenWeatherMap API | フロント |
 | `GEMINI_API_KEY` | Gemini API キー | Edge Function のみ |
+
+## コーディング規約
+- ファイル命名: PascalCase (コンポーネント) / camelCase (utility)
+- import順: React → 外部ライブラリ → 絶対パス (@/) → 相対パス
+- エラーハンドリング: Edge Function呼び出しは必ず try-catch
+- TypeScript: any禁止、unknown使用
+- スタイル: Tailwind優先、style属性は最終手段
+- Supabase: クライアント直アクセスはRLSが効く読み取りのみ。
+  書き込み・LLM呼び出しはEdge Function経由
+
+## 環境変数
+- VITE_* はクライアント露出、それ以外はEdge Function内のみ
+- 機密値(GEMINI_API_KEY等)は Supabaseの
+  Project Settings > Edge Functions > Secrets で管理
+- VITE_SUPABASE_URL に /rest/v1/ が含まれる場合は src/lib/env.ts で自動除去される
+
+## デザイン原則
+- モバイルファースト (max-width 480px 中央寄せ)
+- 配色: 黒基調 (zinc-950) + emerald-400 アクセント
+- 文字: zinc系のグレースケール
+- ミッション「忖度排除」を体現する硬派でクールなUI
+
+## ディレクトリ規約
+- src/pages/ : ルート単位のページ
+- src/features/ : 機能単位のモジュール (scan, ingredients, generic等)
+- src/lib/ : 横断的ユーティリティ (supabase, gemini, env等)
+- src/components/ui/ : shadcn/ui のプリミティブ
+- src/components/layout/ : レイアウト系
+- src/components/common/ : 共通コンポーネント
+- src/stores/ : Zustand ストア
+- src/hooks/ : カスタムフック
+- src/types/ : 型定義 (database.ts は自動生成)
+
+## shadcn/ui コンポーネント追加
+コンポーネントを追加する場合は components.json のエイリアス設定に注意:
+  npx shadcn@latest add <component-name>
+生成先は src/components/ui/ になっていることを確認すること。

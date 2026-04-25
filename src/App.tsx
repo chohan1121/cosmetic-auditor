@@ -1,29 +1,33 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import { Layout } from '@/components/layout/Layout'
-import { ScanPage } from '@/pages/ScanPage'
-import { ProductPage } from '@/pages/ProductPage'
-import { GenericPage } from '@/pages/GenericPage'
-import { ClosetPage } from '@/pages/ClosetPage'
-import { WeatherPage } from '@/pages/WeatherPage'
-import { AuditPage } from '@/pages/AuditPage'
-import { NotFoundPage } from '@/pages/NotFoundPage'
+import { useEffect } from 'react'
+import { RouterProvider } from 'react-router-dom'
+import { Toaster } from '@/components/ui/sonner'
+import { useAuthStore } from '@/stores/authStore'
+import { router } from '@/routes'
+
+function Splash() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-zinc-950">
+      <div className="flex flex-col items-center gap-3">
+        <p className="text-2xl font-bold text-emerald-400">Cosmetic Auditor</p>
+        <div className="h-5 w-5 animate-spin rounded-full border-2 border-emerald-400 border-t-transparent" />
+      </div>
+    </div>
+  )
+}
 
 export default function App() {
+  const { initialize, loading } = useAuthStore()
+
+  useEffect(() => {
+    initialize()
+  }, [initialize])
+
+  if (loading) return <Splash />
+
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route element={<Layout />}>
-          <Route index element={<ScanPage />} />
-          <Route path="product/:id" element={<ProductPage />} />
-          <Route path="generic" element={<GenericPage />} />
-          <Route path="generic/:productId" element={<GenericPage />} />
-          <Route path="closet" element={<ClosetPage />} />
-          <Route path="weather" element={<WeatherPage />} />
-          <Route path="audit" element={<AuditPage />} />
-          <Route path="audit/:productId" element={<AuditPage />} />
-          <Route path="*" element={<NotFoundPage />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+    <>
+      <RouterProvider router={router} />
+      <Toaster theme="dark" position="top-center" />
+    </>
   )
 }
