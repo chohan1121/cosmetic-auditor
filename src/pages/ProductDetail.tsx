@@ -86,7 +86,8 @@ export default function ProductDetail() {
       setError("商品データが渡されていません");
       setLoading(false);
     }
-  }, [id, location.state]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // 依存配列を空にして初回のみ実行
 
   if (loading) {
     return (
@@ -233,12 +234,18 @@ export default function ProductDetail() {
             </div>
           </div>
         ) : (
-          <div className="rounded-xl border border-dashed border-zinc-700 bg-zinc-900/50 px-4 py-3">
-            <p className="text-xs font-medium uppercase tracking-wider text-zinc-600">
-              総合評価
+          <div className="rounded-xl border border-dashed border-zinc-700 bg-zinc-900/50 px-4 py-6">
+            <div className="flex items-center justify-center gap-3 mb-2">
+              <div className="h-5 w-5 animate-spin rounded-full border-2 border-emerald-400 border-t-transparent" />
+              <p className="text-xs font-medium uppercase tracking-wider text-zinc-600">
+                総合評価
+              </p>
+            </div>
+            <p className="text-center text-sm text-zinc-500">
+              AI分析中... 10-15秒ほどお待ちください
             </p>
-            <p className="mt-1 text-sm text-zinc-500">
-              評価を生成中... しばらくお待ちください
+            <p className="mt-2 text-center text-xs text-zinc-600">
+              成分データから正直な評価を生成しています
             </p>
           </div>
         )}
@@ -255,8 +262,11 @@ export default function ProductDetail() {
           {!product.product_ingredients ||
           product.product_ingredients.length === 0 ? (
             <div className="rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-6 text-center">
-              <p className="text-sm text-zinc-500">
-                マッチした成分がありません
+              <p className="text-sm text-zinc-400 mb-2">
+                成分データベースに登録されていない成分のみ、または成分表記なし
+              </p>
+              <p className="text-xs text-zinc-600">
+                総合評価は商品名・ブランド・価格から判断しています
               </p>
             </div>
           ) : (

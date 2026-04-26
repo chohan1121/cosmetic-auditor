@@ -28,6 +28,7 @@ export default function Scan() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const readerRef = useRef<BrowserMultiFormatReader | null>(null);
   const isProcessingRef = useRef(false); // ✨ 処理中フラグ
+  const detectedRef = useRef(false); // ✨ 検出済みフラグ（新規追加）
 
   const [scanState, setScanState] = useState<ScanState>({ status: "idle" });
   const [showManualInput, setShowManualInput] = useState(false);
@@ -64,6 +65,9 @@ export default function Scan() {
         if (!data?.product?.id) {
           throw new Error("製品データが取得できませんでした");
         }
+
+        // カメラを完全停止
+        stopScan();
 
         // データを state として渡す
         navigate(`/products/${data.product.id}`, {
@@ -140,9 +144,20 @@ export default function Scan() {
           videoRef.current,
           (result, error) => {
             if (result) {
+              // ✨ 既に検出済みなら無視
+              if (detectedRef.current) {
+                return;
+              }
+
+              detectedRef.current = true; // ✨ 検出済みフラグをセット
               const code = result.getText();
-              stopScan();
+
+              // ✨ 即座にカメラを停止（他の処理より前）
+              reader.reset();
+
+              console.log("✅ Detected JAN:", code);
               if (navigator.vibrate) navigator.vibrate(100);
+
               analyzeJan(code);
             }
             if (error && !(error instanceof NotFoundException)) {
@@ -165,7 +180,10 @@ export default function Scan() {
     };
 
     start();
-    return () => stopScan();
+    return () => {
+      stopScan();
+      detectedRef.current = false; // ✨ フラグリセット
+    };
   }, [isInsecureContext, stopScan, analyzeJan]);
 
   const handleManualSubmit = (e: React.FormEvent) => {
@@ -255,6 +273,12 @@ export default function Scan() {
                 <p className="text-sm text-zinc-300">
                   {scanState.errorMessage}
                 </p>
+                {scanState.errorMessage?.includes("not found") && (
+                  <p className="text-xs text-zinc-500 mt-2">
+                    💡 ヒント: Yahoo
+                    Shoppingに未登録の商品です。別のJANコードをお試しください。
+                  </p>
+                )}
                 {scanState.errorMessage?.includes("拒否") && (
                   <p className="text-xs text-zinc-500 mt-1">
                     設定方法: アドレスバー左の🔒 → カメラ → 許可
