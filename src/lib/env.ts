@@ -4,9 +4,10 @@ const envSchema = z.object({
   VITE_SUPABASE_URL: z
     .string()
     .url('VITE_SUPABASE_URL は有効なURLである必要があります')
-    .includes('.supabase.co', { message: 'VITE_SUPABASE_URL は .supabase.co を含む必要があります' })
+    .refine((url) => url.includes('.supabase.co'), {
+      message: 'VITE_SUPABASE_URL は .supabase.co を含む必要があります',
+    })
     .transform((url) =>
-      // createClient はベースURLのみ期待するため /rest/v1/ などのパスを除去
       url.replace(/\/rest\/v1\/?$/, '').replace(/\/$/, ''),
     ),
   VITE_SUPABASE_ANON_KEY: z
@@ -24,8 +25,8 @@ const result = envSchema.safeParse({
 })
 
 if (!result.success) {
-  const message = result.error.errors
-    .map((e) => `  [${e.path.join('.')}] ${e.message}`)
+  const message = result.error.issues
+    .map((issue) => `  [${issue.path.join('.')}] ${issue.message}`)
     .join('\n')
   throw new Error(`環境変数の検証に失敗しました:\n${message}`)
 }

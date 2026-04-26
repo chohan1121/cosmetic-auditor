@@ -16,13 +16,30 @@ function Splash() {
 }
 
 export default function App() {
-  const { initialize, loading } = useAuthStore()
+  const { initialize, loading, initError } = useAuthStore()
 
   useEffect(() => {
     initialize()
   }, [initialize])
 
   if (loading) return <Splash />
+
+  if (initError) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-zinc-950 p-6">
+        <div className="w-full max-w-sm space-y-3 rounded-lg border border-red-800 bg-zinc-900 p-4">
+          <p className="font-bold text-red-400">初期化エラー</p>
+          <p className="break-all font-mono text-xs text-zinc-300">{initError}</p>
+          <button
+            onClick={() => initialize()}
+            className="w-full rounded bg-zinc-700 py-2 text-sm text-zinc-100 hover:bg-zinc-600"
+          >
+            再試行
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <>
