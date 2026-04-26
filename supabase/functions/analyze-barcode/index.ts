@@ -4,6 +4,7 @@ import { lookupProduct } from "../_shared/product-lookup.ts";
 import { extractIngredients } from "../_shared/ingredient-extractor.ts";
 import { matchIngredients } from "../_shared/ingredient-matcher.ts";
 import { computeIngredientVector } from "../_shared/vector-compose.ts";
+import { generateVerdict } from "../_shared/verdict-generator.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -73,6 +74,15 @@ Deno.serve(async (req) => {
         function,
         weight_in_synergy
       )
+    ),
+    product_verdicts(
+      id,
+      verdict_text,
+      overall_score,
+      safety_score,
+      efficacy_score,
+      value_score,
+      created_at
     )
   `,
       )
@@ -199,6 +209,38 @@ Deno.serve(async (req) => {
       }
     }
 
+    // ✨ Verdict生成（成分0件でも実行）
+    console.log("🎯 [8.5] Generating verdict...");
+    try {
+      const verdict = await generateVerdict(
+        productInfo.name,
+        productInfo.brand,
+        productInfo.price_jpy,
+        matched, // 空配列でもOK
+      );
+      console.log("✅ [8.5] Verdict generated:", verdict.overall_score);
+
+      const { error: verdictError } = await supabase
+        .from("product_verdicts")
+        .insert({
+          product_id: saved.id,
+          verdict_text: verdict.verdict_text,
+          overall_score: verdict.overall_score,
+          safety_score: verdict.safety_score,
+          efficacy_score: verdict.efficacy_score,
+          value_score: verdict.value_score,
+        });
+
+      if (verdictError) {
+        console.error("❌ [8.5] Verdict save error:", verdictError);
+      } else {
+        console.log("✅ [8.5] Verdict saved");
+      }
+    } catch (verdictErr) {
+      console.error("⚠️ [8.5] Verdict generation failed:", verdictErr);
+      // Verdict生成失敗してもメイン処理は続行
+    }
+
     console.log("🔍 [9] Fetching full product...");
     const { data: full, error: fetchError } = await supabase
       .from("products")
@@ -225,6 +267,15 @@ Deno.serve(async (req) => {
         function,
         weight_in_synergy
       )
+    ),
+    product_verdicts (
+      id,
+      verdict_text,
+      overall_score,
+      safety_score,
+      efficacy_score,
+      value_score,
+      created_at
     )
   `,
       )

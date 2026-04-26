@@ -27,6 +27,7 @@ export default function Scan() {
   const navigate = useNavigate();
   const videoRef = useRef<HTMLVideoElement>(null);
   const readerRef = useRef<BrowserMultiFormatReader | null>(null);
+  const isProcessingRef = useRef(false); // ✨ 処理中フラグ
 
   const [scanState, setScanState] = useState<ScanState>({ status: "idle" });
   const [showManualInput, setShowManualInput] = useState(false);
@@ -38,8 +39,16 @@ export default function Scan() {
 
   const analyzeJan = useCallback(
     async (jan: string) => {
+      // ✨ 処理中なら無視
+      if (isProcessingRef.current) {
+        console.log("⏭️ Already processing, skipping:", jan);
+        return;
+      }
+
+      isProcessingRef.current = true; // ✨ 処理開始
       console.log("✅ Detected JAN:", jan);
       setScanState({ status: "analyzing", detectedCode: jan });
+
       try {
         console.log("📡 Calling analyze-barcode...");
         const { data, error } =
@@ -86,6 +95,8 @@ export default function Scan() {
           errorMessage: message,
           errorDetail: detail,
         });
+      } finally {
+        isProcessingRef.current = false; // ✨ 処理終了
       }
     },
     [navigate],

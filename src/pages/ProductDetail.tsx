@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom"; // useLocation 追加
 import { ArrowLeft, ExternalLink, PackageSearch } from "lucide-react";
 
-// 既存の import の後に追加
 interface ProductIngredient {
   position: number;
   matched_text: string;
@@ -14,6 +13,16 @@ interface ProductIngredient {
     function: string[];
     weight_in_synergy: number;
   };
+}
+
+interface ProductVerdict {
+  id: string;
+  verdict_text: string;
+  overall_score: number;
+  safety_score: number;
+  efficacy_score: number;
+  value_score: number;
+  created_at: string;
 }
 
 interface Product {
@@ -28,6 +37,7 @@ interface Product {
   source_url: string | null;
   created_at: string;
   product_ingredients: ProductIngredient[];
+  product_verdicts?: ProductVerdict[]; // 配列だが通常1件
 }
 
 const CONFIDENCE_LABEL: Record<string, string> = {
@@ -63,6 +73,12 @@ export default function ProductDetail() {
           (a, b) => a.position - b.position,
         );
       }
+
+      // 🔍 デバッグログ追加
+      console.log("📦 Product data received:", stateProduct);
+      console.log("📊 Product verdicts:", stateProduct.product_verdicts);
+      console.log("📊 Verdicts length:", stateProduct.product_verdicts?.length);
+
       setProduct(stateProduct);
       setLoading(false);
     } else {
@@ -178,13 +194,54 @@ export default function ProductDetail() {
           </div>
         </div>
 
-        {/* Verdict placeholder */}
-        <div className="rounded-xl border border-dashed border-zinc-700 bg-zinc-900/50 px-4 py-3">
-          <p className="text-xs font-medium uppercase tracking-wider text-zinc-600">
-            総合評価
-          </p>
-          <p className="mt-1 text-sm text-zinc-500">Phase 1C で実装予定</p>
-        </div>
+        {/* Verdict section */}
+        {product.product_verdicts && product.product_verdicts.length > 0 ? (
+          <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4">
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-xs font-medium uppercase tracking-wider text-zinc-600">
+                総合評価
+              </h2>
+              <div className="flex items-center gap-2">
+                <span className="text-lg font-bold text-emerald-400">
+                  {product.product_verdicts[0].overall_score}
+                </span>
+                <span className="text-xs text-zinc-600">/ 10</span>
+              </div>
+            </div>
+            <p className="text-sm leading-relaxed text-zinc-300">
+              {product.product_verdicts[0].verdict_text}
+            </p>
+            <div className="mt-4 grid grid-cols-3 gap-2">
+              <div className="rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2">
+                <p className="text-xs text-zinc-600">安全性</p>
+                <p className="mt-0.5 text-sm font-semibold text-zinc-300">
+                  {product.product_verdicts[0].safety_score}/10
+                </p>
+              </div>
+              <div className="rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2">
+                <p className="text-xs text-zinc-600">効果</p>
+                <p className="mt-0.5 text-sm font-semibold text-zinc-300">
+                  {product.product_verdicts[0].efficacy_score}/10
+                </p>
+              </div>
+              <div className="rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2">
+                <p className="text-xs text-zinc-600">コスパ</p>
+                <p className="mt-0.5 text-sm font-semibold text-zinc-300">
+                  {product.product_verdicts[0].value_score}/10
+                </p>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="rounded-xl border border-dashed border-zinc-700 bg-zinc-900/50 px-4 py-3">
+            <p className="text-xs font-medium uppercase tracking-wider text-zinc-600">
+              総合評価
+            </p>
+            <p className="mt-1 text-sm text-zinc-500">
+              評価を生成中... しばらくお待ちください
+            </p>
+          </div>
+        )}
 
         {/* Matched ingredients */}
         <section>

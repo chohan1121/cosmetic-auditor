@@ -1,33 +1,33 @@
-import { Outlet, NavLink, useNavigate } from 'react-router-dom'
-import { Home, Camera, Package, User, LogOut } from 'lucide-react'
-import { useAuthStore } from '@/stores/authStore'
-import { cn } from '@/lib/utils'
-import { toast } from 'sonner'
+import { Outlet, NavLink, useNavigate } from "react-router-dom";
+import { Home, Camera, Package, User, LogOut } from "lucide-react";
+import { useAuthStore } from "@/stores/authStore";
+import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 const navItems = [
-  { to: '/',       icon: Home,    label: 'ホーム',       end: true },
-  { to: '/scan',   icon: Camera,  label: 'スキャン',     end: false },
-  { to: '/closet', icon: Package, label: 'クローゼット', end: false },
-  { to: '/profile',icon: User,    label: 'プロフィール', end: false },
-]
+  { to: "/", icon: Home, label: "ホーム", end: true },
+  { to: "/scan", icon: Camera, label: "スキャン", end: false },
+  { to: "/closet", icon: Package, label: "クローゼット", end: false },
+  { to: "/profile", icon: User, label: "プロフィール", end: false },
+];
 
 export function AppLayout() {
-  const { signOut } = useAuthStore()
-  const navigate = useNavigate()
+  const { signOut } = useAuthStore();
+  const navigate = useNavigate();
 
   async function handleSignOut() {
     try {
-      await signOut()
-      navigate('/auth')
+      await signOut();
+      navigate("/auth");
     } catch {
-      toast.error('ログアウトに失敗しました')
+      toast.error("ログアウトに失敗しました");
     }
   }
 
   return (
     <div className="mx-auto flex min-h-screen max-w-[480px] flex-col bg-zinc-950 text-zinc-100">
       {/* Header */}
-      <header className="sticky top-0 z-50 flex h-14 items-center justify-between border-b border-zinc-800 px-4">
+      <header className="fixed top-0 left-0 right-0 z-50 flex h-14 items-center justify-between border-b border-zinc-800 bg-zinc-950 px-4 max-w-[480px] mx-auto">
         <span className="font-bold text-emerald-400">Cosmetic Auditor</span>
         <button
           onClick={handleSignOut}
@@ -40,7 +40,7 @@ export function AppLayout() {
       </header>
 
       {/* Main content */}
-      <main className="flex-1 overflow-y-auto pb-16">
+      <main className="flex-1 overflow-y-auto pb-16 pt-14">
         <Outlet />
       </main>
 
@@ -53,8 +53,10 @@ export function AppLayout() {
             end={end}
             className={({ isActive }) =>
               cn(
-                'flex flex-col items-center gap-1 px-4 py-2 text-xs transition-colors',
-                isActive ? 'text-emerald-400' : 'text-zinc-500 hover:text-zinc-300',
+                "flex flex-col items-center gap-1 px-4 py-2 text-xs transition-colors",
+                isActive
+                  ? "text-emerald-400"
+                  : "text-zinc-500 hover:text-zinc-300",
               )
             }
           >
@@ -64,5 +66,5 @@ export function AppLayout() {
         ))}
       </nav>
     </div>
-  )
+  );
 }
