@@ -29,3 +29,34 @@ export async function generateEmbedding(text: string): Promise<number[]> {
 
   return data.embedding.values
 }
+
+export async function generateContent(
+  prompt: string,
+  options?: { responseMimeType?: string },
+): Promise<string> {
+  const url =
+    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" +
+    GEMINI_API_KEY
+
+  const body: Record<string, unknown> = {
+    contents: [{ parts: [{ text: prompt }] }],
+  }
+  if (options?.responseMimeType) {
+    body.generationConfig = { responseMimeType: options.responseMimeType }
+  }
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  })
+
+  if (!response.ok) {
+    const errorText = await response.text()
+    throw new Error("Gemini content API error: " + response.status + " " + errorText)
+  }
+
+  const data = await response.json()
+  const text: unknown = data.candidates?.[0]?.content?.parts?.[0]?.text
+  return typeof text === "string" ? text : ""
+}

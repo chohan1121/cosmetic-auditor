@@ -11,9 +11,9 @@ interface RequestBody {
 interface IngredientRow {
   id: string
   inci_name: string
-  jp_name: string | null
+  ja_name: string | null
   category: string | null
-  function: string[] | null
+  functions: string[] | null
 }
 
 Deno.serve(async (req) => {
@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
     if (body.ingredient_id) {
       const { data, error } = await supabaseAdmin
         .from("ingredients")
-        .select("id, inci_name, jp_name, category, function")
+        .select("id, inci_name, ja_name, category, functions")
         .eq("id", body.ingredient_id)
         .single()
       if (error) throw error
@@ -42,7 +42,7 @@ Deno.serve(async (req) => {
     } else if (body.batch_all_missing) {
       let query = supabaseAdmin
         .from("ingredients")
-        .select("id, inci_name, jp_name, category, function")
+        .select("id, inci_name, ja_name, category, functions")
         .is("embedding", null)
       if (body.limit) query = query.limit(body.limit)
       const { data, error } = await query
@@ -56,8 +56,8 @@ Deno.serve(async (req) => {
 
     for (const target of targets) {
       try {
-        const functionsText = (target.function ?? []).join(", ")
-        const text = `Cosmetic ingredient: ${target.inci_name} (${target.jp_name ?? ""}). Category: ${target.category ?? "unknown"}. Functions: ${functionsText}.`
+        const functionsText = (target.functions ?? []).join(", ")
+        const text = `Cosmetic ingredient: ${target.inci_name} (${target.ja_name ?? ""}). Category: ${target.category ?? "unknown"}. Functions: ${functionsText}.`
 
         const embedding = await generateEmbedding(text)
 

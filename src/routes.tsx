@@ -1,16 +1,16 @@
-import { createBrowserRouter, Navigate } from 'react-router-dom'
-import { useAuthStore } from '@/stores/authStore'
-import { AppLayout } from '@/components/layout/AppLayout'
+import { createBrowserRouter, Navigate } from "react-router-dom";
+import { useAuthStore } from "@/stores/authStore";
+import { AppLayout } from "@/components/layout/AppLayout";
 
 // Pages (lazy import can be added later for code splitting)
-import Home from '@/pages/Home'
-import Scan from '@/pages/Scan'
-import ProductDetail from '@/pages/ProductDetail'
-import GenericFinder from '@/pages/GenericFinder'
-import Closet from '@/pages/Closet'
-import SynergyCheck from '@/pages/SynergyCheck'
-import Profile from '@/pages/Profile'
-import Auth from '@/pages/Auth'
+import Home from "@/pages/Home";
+import Scan from "@/pages/Scan";
+import ProductDetail from "@/pages/ProductDetail";
+import GenericFinder from "@/pages/GenericFinder";
+import Closet from "@/pages/Closet";
+import SynergyCheck from "@/pages/SynergyCheck";
+import Profile from "@/pages/Profile";
+import Auth from "@/pages/Auth";
 
 function Splash() {
   return (
@@ -20,21 +20,21 @@ function Splash() {
         <div className="h-5 w-5 animate-spin rounded-full border-2 border-emerald-400 border-t-transparent" />
       </div>
     </div>
-  )
+  );
 }
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuthStore()
-  if (loading) return <Splash />
-  if (!user) return <Navigate to="/auth" replace />
-  return <>{children}</>
+  const { user, loading } = useAuthStore();
+  if (loading) return <Splash />;
+  if (!user) return <Navigate to="/auth" replace />;
+  return <>{children}</>;
 }
 
 function AuthOnlyRoute({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuthStore()
-  if (loading) return <Splash />
-  if (user) return <Navigate to="/" replace />
-  return <>{children}</>
+  const { user, loading } = useAuthStore();
+  if (loading) return <Splash />;
+  if (user) return <Navigate to="/" replace />;
+  return <>{children}</>;
 }
 
 export const router = createBrowserRouter([
@@ -43,36 +43,68 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <ProtectedRoute><Home /></ProtectedRoute>,
+        element: (
+          <ProtectedRoute>
+            <Home />
+          </ProtectedRoute>
+        ),
       },
       {
-        path: 'scan',
-        element: <ProtectedRoute><Scan /></ProtectedRoute>,
+        path: "scan",
+        element: (
+          <ProtectedRoute>
+            <Scan />
+          </ProtectedRoute>
+        ),
       },
       {
-        path: 'product/:id',
-        element: <ProtectedRoute><ProductDetail /></ProtectedRoute>,
+        path: "products/:id",
+        element: (
+          <ProtectedRoute>
+            <ProductDetail />
+          </ProtectedRoute>
+        ),
       },
       {
-        path: 'generic',
-        element: <ProtectedRoute><GenericFinder /></ProtectedRoute>,
+        path: "generic",
+        element: (
+          <ProtectedRoute>
+            <GenericFinder />
+          </ProtectedRoute>
+        ),
       },
       {
-        path: 'closet',
-        element: <ProtectedRoute><Closet /></ProtectedRoute>,
+        path: "closet",
+        element: (
+          <ProtectedRoute>
+            <Closet />
+          </ProtectedRoute>
+        ),
       },
       {
-        path: 'synergy',
-        element: <ProtectedRoute><SynergyCheck /></ProtectedRoute>,
+        path: "synergy",
+        element: (
+          <ProtectedRoute>
+            <SynergyCheck />
+          </ProtectedRoute>
+        ),
       },
       {
-        path: 'profile',
-        element: <ProtectedRoute><Profile /></ProtectedRoute>,
+        path: "profile",
+        element: (
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        ),
       },
     ],
   },
   {
-    path: 'auth',
-    element: <AuthOnlyRoute><Auth /></AuthOnlyRoute>,
+    path: "auth",
+    element: (
+      <AuthOnlyRoute>
+        <Auth />
+      </AuthOnlyRoute>
+    ),
   },
-])
+]);

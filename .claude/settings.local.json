@@ -11,7 +11,15 @@
       "Bash(printf \"n\\\\n\")",
       "Bash(npx shadcn@latest init)",
       "Bash(npx shadcn@latest add button input card dialog badge tabs label --yes)",
-      "Bash(npx shadcn@latest add sonner --yes)"
+      "Bash(npx shadcn@latest add sonner --yes)",
+      "Read(//c/c/Users/zhang/OneDrive/デスクトップ/cosmetic-auditor/src/pages/**)",
+      "Read(//c/c/Users/zhang/OneDrive/デスクトップ/cosmetic-auditor/src/**)",
+      "Bash(npm list *)",
+      "Bash(node -e \"const z = require\\('./node_modules/@zxing/library'\\); console.log\\(Object.keys\\(z\\).filter\\(k => k.includes\\('Browser'\\) || k.includes\\('IScan'\\)\\)\\)\")",
+      "Bash(node -e \"import\\('@zxing/library'\\).then\\(z => console.log\\(Object.keys\\(z\\)\\)\\)\")",
+      "Bash(node *)",
+      "Bash(npx tsc *)",
+      "Bash(curl *)"
     ]
   }
 }
