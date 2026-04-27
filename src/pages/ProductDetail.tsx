@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom"; // useLocation 追加
-import { ArrowLeft, ExternalLink, PackageSearch } from "lucide-react";
+import { ArrowLeft, ExternalLink, PackageSearch, Shirt } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 
 interface ProductIngredient {
   position: number;
@@ -57,10 +58,12 @@ const CONFIDENCE_COLOR: Record<string, string> = {
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const location = useLocation(); // 追加
+  const location = useLocation();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isInCloset, setIsInCloset] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
 
   useEffect(() => {
     // Scan.tsx から navigate で渡されたデータを使う
@@ -74,20 +77,114 @@ export default function ProductDetail() {
         );
       }
 
-      // 🔍 デバッグログ追加
-      console.log("📦 Product data received:", stateProduct);
-      console.log("📊 Product verdicts:", stateProduct.product_verdicts);
-      console.log("📊 Verdicts length:", stateProduct.product_verdicts?.length);
-
+      console.log("📦 Product data from state:", stateProduct);
       setProduct(stateProduct);
       setLoading(false);
+    } else if (id) {
+      // state がない場合は ID から取得（クローゼットからの遷移など）
+      console.log("🔍 Fetching product by ID:", id);
+      const fetchProduct = async () => {
+        const { data, error } = await supabase
+          .from("products")
+          .select(
+            `
+            id,
+            jan_code,
+            product_name,
+            brand,
+            price_jpy,
+            image_url,
+            raw_ingredient_text,
+            source,
+            source_url,
+            created_at,
+            product_ingredients (
+              position,
+              matched_text,
+              match_confidence,
+              ingredient:ingredients (
+                id,
+                inci_name,
+                jp_name,
+                function,
+                weight_in_synergy
+              )
+            ),
+            product_verdicts (
+              id,
+              verdict_text,
+              overall_score,
+              safety_score,
+              efficacy_score,
+              value_score,
+              created_at
+            )
+          `,
+          )
+          .eq("id", id)
+          .single();
+
+        if (error) {
+          console.error("❌ Error fetching product:", error);
+          setError("商品の取得に失敗しました");
+          setLoading(false);
+        } else if (data) {
+          if (data.product_ingredients) {
+            data.product_ingredients.sort((a, b) => a.position - b.position);
+          }
+          console.log("✅ Product fetched:", data);
+          setProduct(data as Product);
+          setLoading(false);
+        }
+      };
+      fetchProduct();
     } else {
-      // データがなければエラー
+      // ID も state もない
       setError("商品データが渡されていません");
       setLoading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // 依存配列を空にして初回のみ実行
+
+  useEffect(() => {
+    if (!product?.id) return;
+    const checkCloset = async () => {
+      const { data } = await supabase
+        .from("user_closet")
+        .select("id")
+        .eq("product_id", product.id)
+        .maybeSingle();
+      setIsInCloset(!!data);
+    };
+    checkCloset();
+  }, [product?.id]);
+
+  const handleAddToCloset = async () => {
+    if (isInCloset) {
+      alert("既にクローゼットに追加済みです");
+      return;
+    }
+
+    setIsAdding(true);
+    const { error } = await supabase.from("user_closet").insert({
+      product_id: product?.id,
+    } as any);
+
+    if (error) {
+      if (error.code === "23505") {
+        // PostgreSQL unique violation
+        alert("既にクローゼットに追加済みです");
+        setIsInCloset(true);
+      } else {
+        console.error("Error:", error);
+        alert("追加に失敗しました");
+      }
+    } else {
+      setIsInCloset(true);
+      alert("クローゼットに追加しました");
+    }
+    setIsAdding(false);
+  };
 
   if (loading) {
     return (
@@ -194,6 +291,24 @@ export default function ProductDetail() {
             )}
           </div>
         </div>
+
+        {/* Add to closet button */}
+        <button
+          onClick={handleAddToCloset}
+          disabled={isInCloset || isAdding}
+          className={`flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-medium transition-colors ${
+            isInCloset
+              ? "cursor-default border border-zinc-700 bg-zinc-800 text-zinc-500"
+              : "bg-emerald-400 text-zinc-950 hover:bg-emerald-300 active:bg-emerald-500"
+          }`}
+        >
+          {isAdding ? (
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-950 border-t-transparent" />
+          ) : (
+            <Shirt size={16} />
+          )}
+          {isInCloset ? "追加済み" : "クローゼットに追加"}
+        </button>
 
         {/* Verdict section */}
         {product.product_verdicts && product.product_verdicts.length > 0 ? (
