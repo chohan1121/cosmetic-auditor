@@ -40,3 +40,10 @@ lerna-debug.log*
 # Supabase
 supabase/.branches/
 supabase/.temp/
+
+.vercel
+.env*
+
+# 移行時の退避バックアップ(旧実装の一時保管、コミット対象外)
+_old_config_backup/
+src_old_backup/

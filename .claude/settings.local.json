@@ -19,7 +19,12 @@
       "Bash(node -e \"import\\('@zxing/library'\\).then\\(z => console.log\\(Object.keys\\(z\\)\\)\\)\")",
       "Bash(node *)",
       "Bash(npx tsc *)",
-      "Bash(curl *)"
+      "Bash(curl *)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\zhang\\\\OneDrive\\\\デスクトップ\\\\cosmetic-auditor\" -Recurse -Force | Select-Object FullName | ForEach-Object { $_.FullName -replace [regex]::Escape\\(\"C:\\\\Users\\\\zhang\\\\OneDrive\\\\デスクトップ\\\\cosmetic-auditor\\\\\"\\), \"\" } | Sort-Object)",
+      "Bash(python3 -c ' *)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(d['dependencies'].get\\('@supabase/supabase-js','not found'\\)\\)\")",
+      "Bash(python3 -c \"import json; d=json.load\\(open\\('node_modules/@supabase/supabase-js/package.json'\\)\\); print\\(d['version']\\)\")",
+      "Bash(dir node_modules\\\\@supabase\\\\postgrest-js)"
     ]
   }
 }
